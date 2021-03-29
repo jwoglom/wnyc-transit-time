@@ -1,0 +1,486 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8" />
+	
+	<!-- Chartbeat Time Capture -->
+	<script type="text/javascript">var _sf_startpt=(new
+		Date()).getTime();
+	</script>
+	
+	<title>Transit Time NYC | WNYC</title>
+
+	<meta name="author" content="WNYC Data News" />
+	<meta name="description" content="A dataviz project by the WNYC Data News Team." />
+	<meta name="robots" content="index, follow" />
+
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">	
+	
+	<!-- Web app-able -->
+	<meta name="apple-mobile-web-app-capable" content="yes"/>
+	<meta name="apple-mobile-web-app-status-bar-style" content="black"/>
+
+	<!-- all the CSS -->
+	<link rel="stylesheet" href="css/styles.css" type="text/css" />
+	<link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Lato:400,700' type='text/css'>
+	<link rel="stylesheet" href="font-awesome/css/font-awesome.min.css">
+	
+	<!-- all the JS -->
+	<script type="text/javascript" src="js/css3-mediaqueries.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+        <script type="text/javascript" src="//project.wnyc.org/assets/js/underscore-min.js"></script>
+        <script type="text/javascript" src="//project.wnyc.org/assets/js/moment.min.js"></script>
+        <script type="text/javascript" src="js/topojson.js"></script>
+	<script src="js/script.js"></script>
+	
+	<!-- Add additional script calls go here -->
+	<!-- MapBox -->
+    <script src='https://api.tiles.mapbox.com/mapbox.js/v1.2.0/mapbox.js'></script>
+    <script src="js/leaflet-pip.min.js"></script>
+    <link href='https://api.tiles.mapbox.com/mapbox.js/v1.2.0/mapbox.css' rel='stylesheet' />
+      <!--[if lte IE 8]>
+        <link href='https://api.tiles.mapbox.com/mapbox.js/v1.2.0/mapbox.ie.css' rel='stylesheet' />
+        <![endif] -->
+	<script src="js/mapboxmaps.js" type="text/javascript" charset="utf-8"></script>
+
+
+	
+<style>
+
+	/*	Project-specific styles */
+	
+.leaflet-overlay-pane {
+    z-index: 1;
+
+}
+#legend {
+	z-index: 5;
+	padding: 0;
+}
+	#legend * {
+		padding: 0
+	}
+	
+	#legendWide {
+		display: block;
+		float: right;
+		width: 600px;
+	}
+	#legendWide ul {
+		list-style: none;
+	}
+	#legendWide ul li {
+		float: left;
+		margin: 15px 0px 0 0;
+	}
+	#legendWide ul li img {
+		display: block;
+		height: 10px;
+		width: 58px;
+		margin: 0 0 5px 0;
+	}
+	
+	#legendSet, #legendDrawer {
+		display: none;
+	}
+	
+@media handheld, only screen and (max-width: 870px) {
+
+	#legendWide {
+		display: none;
+	}
+	#legendSet {
+		display: block;
+		height: 80px;
+		width: 260px;
+		color: #fff;
+		background-color: #333;
+		overflow: visible;
+		position: relative;
+		float: right;
+		font-size: 14px;
+	}
+		#legendSet span {
+			overflow: visible;
+			display: block;
+		}
+		#legendToggle {
+			padding: 6px 0;
+			cursor: pointer;
+			height: 100%;
+			background-color: #333;
+		}
+			#legendToggle span {
+				font-family: 'Lato', helvetica, arial, sans-serif;	
+				font-size: 12px;
+				font-weight: 900;
+				text-transform: uppercase;	
+				letter-spacing: 0.1em;
+				margin: 0 0 0 20px;
+			}
+			#legendToggle span img {
+				position: relative;
+				top: 8px;
+			}
+			#legendToggle i.iconRight {
+				position: absolute;
+				top: 20px;
+				right: 20px;
+			}
+			#legendToggle .shortKey {
+				display: none;
+			}
+		#legendDrawer {
+			background-color: #333;
+			position: absolute;
+			top: 53px;
+			left: 0px;
+			z-index: 50;
+			display: none;
+			padding: 10px 0;
+			width: 100%;
+		} 
+			#legendDrawer ul {
+				padding: 0 15px;
+			}
+			#legendDrawer ul li {
+				list-style: none;
+				clear: both;
+				float: left;
+				margin: 0 0 10px 0;
+			f}
+			#legendDrawer img {
+				display: inline;
+				margin: -4px 0 0 0;
+				padding: 0 10px 0 0;		
+				float: left;	
+			}
+			
+}
+
+@media handheld, only screen and (max-width: 500px) {
+	
+	#legendWide {
+		display: none;
+	}
+	#legend {
+		height: 98px;
+	}
+	#legendSet, #legendToggle {
+		display: block;
+		width: 100%;
+		height: 25px;
+		margin: 0;
+	}
+	#legendSet {
+		height: 50px;
+		float: left;
+	}
+	#legendToggle span {
+		position: relative;
+		top: -4px;
+	}
+	#legendToggle i.iconRight {
+		top: 15px;
+	}
+	#legendDrawer {
+		top: 43px;
+	}
+
+}
+
+@media handheld, only screen and (max-width: 275px) {
+	
+	#legendSet #legendToggle .shortKey {
+		display: block;
+		position: relative;
+		top: 9px;
+	}
+	#legendWide, #legendSet #legendToggle .longKey {
+		display: none;
+	}
+	
+}
+
+#zoombox {
+    height: 30px;
+	margin: 10px 0 10px 15px;
+	font-size: 14px;
+	font-family: 'Lato', helvetica, arial, sans-serif;
+	padding: 0 10px;
+}
+#zoombutton {
+	position: relative;
+	margin: 0 0 0 5px;
+	border: 0px;
+    padding: 10px 15px;
+	font-family: 'Lato', helvetica, arial, sans-serif;	
+	font-size: 12px;
+	font-weight: 900;
+	text-transform: uppercase;
+	letter-spacing: 0.1em;
+	color: #fff;
+	background: #000;
+}
+	#zoombutton:hover {
+		background: #e51133;
+	}
+	
+@media handheld, only screen and (max-width: 200px) {
+	
+	#zoombox {
+		width: 75px;
+	}
+	
+}
+	
+#map {
+	z-index: 1;
+	width: 100%;
+	position: absolute;
+        background-color: white;
+        cursor: pointer;
+}	
+
+#flyouts {
+	color: #fff;
+	background: #333;
+}
+	
+</style>
+
+<!-- Facebook Og Tags -->
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://project.wnyc.org/transit-time/" />
+<meta property="og:title" content="Transit Time NYC" />
+<meta property="og:description" content="Travel times from any point in NYC to everywhere else via subway or on foot. (Staten Island Railway is included; bike share isn't.) Click the map or enter a location." />
+<meta property="og:image" content="https://project.wnyc.org/transit-time/img/fb-detail.png" />
+
+<!-- Start Google Analytic Code --> 
+	<script type="text/javascript">
+
+	 var _gaq = _gaq || [];
+	 _gaq.push(['_setAccount', 'UA-283599-23']);
+	 _gaq.push(['_trackPageview']);
+
+	 (function() {
+	   var ga = document.createElement('script'); ga.type =
+	'text/javascript'; ga.async = true;
+	   ga.src = ('https:' == document.location.protocol ? 'https://ssl' :
+	'http://www') + '.google-analytics.com/ga.js';
+	   var s = document.getElementsByTagName('script')[0];
+	s.parentNode.insertBefore(ga, s);
+	 })();
+
+	</script>
+<!-- End Google Analytic Code -->
+
+</head>
+
+<body>
+
+<div id="container">
+	
+	<div id="headerTop">
+		<a href="http://www.wnyc.org" target="_blank"><h1>WNYC</h1></a>
+		<h2>Transit Time NYC</h2>
+		<div id="toggle" class="">
+			<i class="icon-reorder icon-2x"></i>
+		</div>
+		<div id="share">
+			<a title="Tweet" class="share-action twitter" href="https://twitter.com/share?url=https://project.wnyc.org/transit-time/&text=Map your travel times across NYC, by subway or foot, from any single point @WNYC&via=WNYC" target="_blank"><i class="icon-twitter icon-large"></i></a>
+			<a title="Share on Facebook" class="share-action facebook" href="https://www.facebook.com/sharer/sharer.php?u=https://project.wnyc.org/transit-time/" target="_blank"><i class="icon-facebook icon-large"></i></a> 
+
+		</div>
+	</div>
+	
+	<div id="headerBottom">
+		<h2>Transit Time NYC</h2>
+		<p class="intro">Pick a start point and see subway travel times to everywhere else in NYC. Just click the map or enter an address. <em>Staten Island Railway included; ferries, buses and bikes are not.</em></p>
+	</div>
+	
+	<div id="legend">
+		
+		<input type="text" id="zoombox" placeholder="Start from an address"></input>
+        <button id="zoombutton">Go</button>
+
+		<div id="legendWide">
+			<ul>
+				<li><span><img src="img/tier1.png" alt="IMG">10 min</span></li>
+				<li><span><img src="img/tier2.png" alt="IMG">15 min</span></li>
+				<li><span><img src="img/tier3.png" alt="IMG">20 min</span></li>
+				<li><span><img src="img/tier4.png" alt="IMG">30 min</span></li>
+				<li><span><img src="img/tier5.png" alt="IMG">40 min</span></li>
+				<li><span><img src="img/tier6.png" alt="IMG">50 min</span></li>
+				<li><span><img src="img/tier7.png" alt="IMG">60 min</span></li>
+				<li><span><img src="img/tier8.png" alt="IMG">75 min</span></li>
+				<li><span><img src="img/tier9.png" alt="IMG">90 min</span></li>
+				<li><span><img src="img/tier10.png" alt="IMG">120 min</span></li>
+			</ul>
+		</div>
+
+		<div id="legendSet">
+			<div id="legendToggle">
+				<span class="shortKey">View Key</span>
+				<span class="longKey">10min &nbsp; <img src="img/tiers.png" alt="IMG" width="80" height="25"> &nbsp; 120min</span>
+				<i class="iconRight icon-caret-down"></i>
+			</div>
+			<div id="legendDrawer">
+				<ul>
+					<li><span><img src="img/tier1.png" alt="IMG" width="25" height="25">10 min</span></li>
+					<li><span><img src="img/tier2.png" alt="IMG" width="25" height="25">15 min</span></li>
+					<li><span><img src="img/tier3.png" alt="IMG" width="25" height="25">20 min</span></li>
+					<li><span><img src="img/tier4.png" alt="IMG" width="25" height="25">30 min</span></li>
+					<li><span><img src="img/tier5.png" alt="IMG" width="25" height="25">40 min</span></li>
+					<li><span><img src="img/tier6.png" alt="IMG" width="25" height="25">50 min</span></li>
+					<li><span><img src="img/tier7.png" alt="IMG" width="25" height="25">60 min</span></li>
+					<li><span><img src="img/tier8.png" alt="IMG" width="25" height="25">75 min</span></li>
+					<li><span><img src="img/tier9.png" alt="IMG" width="25" height="25">90 min</span></li>
+					<li><span><img src="img/tier10.png" alt="IMG" width="25" height="25">120 min</span></li>
+				</ul>
+			</div>
+		</div>
+		
+        
+	</div>
+	
+	<div id="map">
+		
+	</div>
+	
+	<div id="flyouts">
+		<span>Flyouts go here</span>
+	</div>
+	
+	<div class="toolsFlyouts" id="dataFlyout">
+		<strong>Method</strong>
+		<p>We divided NYC into 2,930 hexagons and calculated the time it would take to travel by subway and walking from the center of each hexagon to every other using <a href="http://opentripplanner.com/" target="_blank">OpenTripPlanner</a> and the MTA's <a href="http://www.mta.info/developers/download.html" title="mta.info | Developer Data Downloads">subway schedule data</a>. We simulated each trip as starting at 9 a.m. on a weekday.</p>
+		<br />
+		<p>
+		The 4,290,985 calculations took four extra-large Amazon <a href="http://aws.amazon.com/ec2/" title="Amazon Elastic Compute Cloud (Amazon EC2), Cloud Computing Servers" target="_blank">Elastic Compute Cloud</a> instances just under a week to complete.</p>
+				<br />
+		<p>
+		We generated the hexagon grid in the open-source mapping program <a href="http://www.qgis.org/" title="Welcome to the Quantum GIS Project">Quantum GIS</a> using the <a href="http://michaelminn.com/linux/mmqgis/" title="MMQGIS">MMQGIS plug-in</a>. Here's that grid as a <a href="https://project.wnyc.org/transit-time/data/nyc_hexes_2000ft_4326.zip" title="">shapefile</a> and as <a href="https://project.wnyc.org/transit-time/data/nyc_hexes.topojson" title="">TopoJSON</a>. And <a href="https://project.wnyc.org/transit-time/data/transit-time-json-files.zip">here's the 33MB zip file</a> with each hexagon's data as json.</p>
+		<div class="closeButton">close</div>
+	</div>
+	
+	<div class="toolsFlyouts" id="embedFlyout">
+		<strong>Direct Link</strong>
+		<p>https://project.wnyc.org/transit-time/</p>
+		<br />
+		<strong>Embed the Blank Map</strong>
+
+		<p>&lt;iframe frameborder="0" scrolling ="no" src="https://project.wnyc.org/transit-time/index.html" width="100%" height="785" &gt;&lt;/iframe&gt;</p>
+                <br />
+		<strong>Embed Current Snapshot</strong>
+		<p class="hashview">&lt;iframe frameborder="0" scrolling ="no" src="https://project.wnyc.org/transit-time/index.html" width="100%" height="785" &gt;&lt;/iframe&gt;</p>
+		<div class="closeButton">close</div>
+	</div>
+	
+	<div class="toolsFlyouts" id="creditsFlyout">
+		<strong>Made by</strong>
+		<p>Steven Melendez, John Keefe and Louise Ma / WNYC Data News Team. Follow us @<a href="https://twitter.com/datanews" target="_blank">datanews</a>, email us <a href="mailto:jkeefe@wnyc.org?subject=Project_Feedback">here</a>.</p>
+		<br />
+		<p>Inspired by the excellent <a href="http://www.triptropnyc.com/" title="Triptrop NYC: extraordinarily pretty subway maps from anywhere to everywhere in new york city" target="_blank">Triptrop</a> map by <a href="https://twitter.com/dangerscarf" target="_blank">Jonathan Soma</a>, and rebuilt with his permission and support.</p>
+		<br />
+		<p>Built with <a href="http://mapbox.com/about/maps/" target ="_blank" title="Our maps | MapBox">Mapbox, OpenStreetMap</a> and <a href="http://leafletjs.com/" target="_blank" title="Leaflet - a JavaScript library for mobile-friendly maps">Leaflet</a>. Geocoding courtesy of <a href="http://www.mapquest.com/" target="_blank">MapQuest</a> <img src="http://developer.mapquest.com/content/osm/mq_logo.png"></p> 
+		<br />
+		<p> The WNYC Data News Team is part of a public radio station supported by audience contributions. If you like what you see, consider <a href="https://pledge3.wnyc.org/epledge/wnyc-data-news/?utm_source=wnyc&utm_medium=button&utm_campaign=pledge&utm_content=datanews" target="_blank">supporting our work</a>.</p>
+		<div class="closeButton">close</div>
+	</div>
+	
+	<ul id="tools">
+		<li class="left" id="toolsData">Data</li>
+		<li class="left" id="toolsEmbed">Embed</li>
+		<a href="https://project.wnyc.org/transit-time/" target="_blank"><li class="left">Fullscreen</li></a>
+		<li class="right" id="toolsCredits">Credits</li>
+		<a href="http://www.wnyc.org/blogs/transportation-nation/2013/jul/10/bloombergs-transportation-legacy-longer-commutes-non-wealthy/" target="_blank"><li class="right">Story</li></a>
+	</ul>
+	
+	<div id="mobileFlyout">
+		<h2>Transit Time NYC</h2>
+		<p class="intro">Pick a start point and see subway travel times to everywhere else in NYC. Just click the map or enter an address. <em>Staten Island Railway included; ferries, buses and bikes are not.</em></p>
+		<div id="share">
+			<a title="Tweet" class="share-action twitter" href="https://twitter.com/share?url=https://project.wnyc.org/transit-time/&text=Map your travel times across NYC, by subway or foot, from any single point @WNYC&via=WNYC" target="_blank"><i class="icon-twitter"></i> Twitter</a>
+			<a title="Share on Facebook" class="share-action facebook" href="https://www.facebook.com/sharer/sharer.php?u=https://project.wnyc.org/transit-time/" target="_blank"><i class="icon-facebook"></i> Facebook</a>
+		</div>
+		<ul id="menu">
+			<a href="http://www.wnyc.org/blogs/transportation-nation/2013/jul/10/bloombergs-transportation-legacy-longer-commutes-non-wealthy/" target="_blank"><li>
+				<h4><i class="icon-file-alt"></i> Read full story</h4>
+				<i class="iconRight icon-external-link-sign"></i>
+			</li></a>
+			<a href="https://project.wnyc.org/transit-time/" target="_blank"><li>
+				<h4><i class="icon-desktop"></i> View in new window</h4>
+				<i class="iconRight icon-external-link-sign"></i>
+			</li></a>
+			<li id="mobileData">
+				<h4><i class="icon-tasks"></i> Data</h4>
+				<i class="iconRight icon-plus-sign-alt"></i>
+			</li>
+			<li class="drawer" id="dataDrawer">
+				<strong>Method</strong>
+				<p>We divided NYC into 2,930 hexagons and calculated the time it would take to travel by subway and walking from the center of each hexagon to every other one using <a href="http://opentripplanner.com/" target="_blank">OpenTripPlanner</a> and the MTA's <a href="http://www.mta.info/developers/download.html" title="mta.info | Developer Data Downloads">subway schedule data</a>. We simulated each trip as starting at 9 a.m. on a weekday.</p>
+				<br />
+				<p>
+				The 4,290,985 calculations took four extra-large Amazon <a href="http://aws.amazon.com/ec2/" title="Amazon Elastic Compute Cloud (Amazon EC2), Cloud Computing Servers" target="_blank">Elastic Compute Cloud</a> instances just under a week to complete.</p>
+				<p>
+				We generated the hexagon grid in the open-source mapping program <a href="http://www.qgis.org/" title="Welcome to the Quantum GIS Project">Quantum GIS</a> using the <a href="http://michaelminn.com/linux/mmqgis/" title="MMQGIS">MMQGIS plug-in</a>. Here's that grid as a <a href="https://project.wnyc.org/transit-time/data/nyc_hexes_2000ft_4326.zip" title="">shapefile</a> and as <a href="https://project.wnyc.org/transit-time/data/nyc_hexes.topojson" title="">TopoJSON</a>. And <a href="https://project.wnyc.org/transit-time/data/transit-time-json-files.zip">here's the 33MB zip file</a> with each hexagon's data as json.</p>
+			</li>
+			<li id="mobileEmbed">
+				<h4><i class="icon-code"></i> Embed</h4>
+				<i class="iconRight icon-plus-sign-alt"></i>
+			</li>
+			<li class="drawer" id="embedDrawer">
+				<strong>Direct Link</strong>
+				<p>https://project.wnyc.org/transit-time/</p>
+				<strong>Embed the Blank Map</strong>
+				<p>&lt;iframe frameborder="0" scrolling ="no" src="https://project.wnyc.org/transit-time/" width="100%" height="785" &gt;&lt;/iframe&gt;</p>
+                                <strong>Embed Current Snapshot</strong>
+                                <p class="hashview">&lt;iframe frameborder="0" scrolling ="no" src="https://project.wnyc.org/transit-time/index.html" width="100%" height="785" &gt;&lt;/iframe&gt;</p>
+			</li>
+			<li id="mobileCredits">
+				<h4><i class="icon-pushpin"></i> Credits</h4>
+				<i class="iconRight icon-plus-sign-alt"></i>
+			</li>
+			<li class="drawer" id="creditsDrawer">
+				<strong>Made by</strong>
+				<p>Steven Melendez, John Keefe and Louise Ma / WNYC Data News Team. Follow us @<a href="https://twitter.com/datanews" target="_blank">datanews</a>, email us <a href="mailto:jkeefe@wnyc.org?subject=Project_Feedback">here</a>.</p>
+				<br />
+				<p>Inspired by the excellent <a href="http://www.triptropnyc.com/" title="Triptrop NYC: extraordinarily pretty subway maps from anywhere to everywhere in new york city" target="_blank">Triptrop</a> map by <a href="https://twitter.com/dangerscarf" target="_blank">Jonathan Soma</a>, and rebuilt with his permission and support.</p>
+				<br />
+				<p>Built with <a href="http://mapbox.com/about/maps/" target ="_blank" title="Our maps | MapBox">Mapbox, OpenStreetMap</a> and <a href="http://leafletjs.com/" target="_blank" title="Leaflet - a JavaScript library for mobile-friendly maps">Leaflet</a>. Geocoding courtesy of <a href="http://www.mapquest.com/" target="_blank">MapQuest</a> <img src="http://developer.mapquest.com/content/osm/mq_logo.png"></p>
+				<p>The WNYC Data News Team is part of a public radio station supported by audience contributions. If you like what you see, consider <a href="https://pledge3.wnyc.org/epledge/wnyc-data-news/?utm_source=wnyc&utm_medium=button&utm_campaign=pledge&utm_content=datanews" target="_blank">supporting our work</a>.</p>
+			</li>
+		</ul>
+	</div>
+	
+</div><!-- #container -->
+
+<script type="text/javascript" src="https://project.wnyc.org/assets/js/retina.js"></script>
+
+<!-- Begin Chartbeat Code -->
+	<script type="text/javascript">
+	var _sf_async_config={uid:4030,domain:"project.wnyc.org"};
+	(function(){
+	 function loadChartbeat() {
+	   window._sf_endpt=(new Date()).getTime();
+	   var e = document.createElement('script');
+	   e.setAttribute('language', 'javascript');
+	   e.setAttribute('type', 'text/javascript');
+	   e.setAttribute('src',
+	      (("https:" == document.location.protocol) ?
+	"https://a248.e.akamai.net/chartbeat.download.akamai.com/102508/" :
+	"http://static.chartbeat.com/") +
+	      "js/chartbeat.js");
+	   document.body.appendChild(e);
+	 }
+	 var oldonload = window.onload;
+	 window.onload = (typeof window.onload != 'function') ?
+	    loadChartbeat : function() { oldonload(); loadChartbeat(); }; })();
+	</script>
+<!-- End Chartbeat Code -->
+
+</body>
+
+</html>
