@@ -57,7 +57,10 @@ function getColor(minutes){
 
 }
 function selectHex(num){
-    
+    if (num === undefined || num === null) {
+        num = 747; // Default selection on load
+    }
+ 
     if (num == 1789 || num == 1732)
     {
         // Deal with Bronx Zoo oddities
