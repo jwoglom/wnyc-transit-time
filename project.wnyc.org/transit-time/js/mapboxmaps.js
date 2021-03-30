@@ -101,8 +101,9 @@ function clickHandler(e){
 }
 function geocode(){
     var address = $('#zoombox').val();
-    address += ', new york ny';
-    var url = 'https://open.mapquestapi.com/nominatim/v1/search?format=json&json_callback=?&limit=1&location=New York, NY&q=' + address;
+    if (address.toLowerCase().indexOf('new york') === -1 && address.toLowerCase().indexOf('nyc') === -1 && parseInt(address.substr(-5)) === NaN)
+        address += ', new york ny';
+    var url = 'https://open.mapquestapi.com/nominatim/v1/search?key=nqdAiXfAZX7VseX26ox9T4Bz20GAAcHE&format=json&json_callback=?&limit=1&location=New York, NY&q=' + address;
     url = encodeURI(url);
 
     $.getJSON(url, function(data){
@@ -130,6 +131,8 @@ function geocode(){
 
 }
 function initialize_map(){
+    L.mapbox.accessToken = 'pk.eyJ1IjoiandvZ2xvbSIsImEiOiJja212OTM1N2gwMnVvMm9sZG05Z251dHE1In0._jzGH6j8lD9SSxG4OEAEwg';
+
     map = new L.mapbox.map('map', null,{
         center: new L.LatLng(40.72280, -73.95464),
         zoom: 12,
@@ -145,8 +148,8 @@ function initialize_map(){
         style: {
             fill: true,
             fillOpacity: 0,
-            stroke: false
-
+            stroke: false,
+            zIndex: 2
         },
         onEachFeature: function (feature, layer) {
             feature.properties.num = whichFeature;
@@ -155,10 +158,18 @@ function initialize_map(){
         }
         
         });
-        mblayer = new L.mapbox.tileLayer('jkeefe.map-id6ukiaw');
+        /*var tileId = 'jkeefe.map-id6ukiaw';
+        mblayer = new L.mapbox.tileLayer(tileId,
+		{tileSize: 512,
+		zoomOffset: -1,
+		id: tileId});
         mblayer.addTo(map);
-        map.addLayer(layer, true ); // Add at bottom
-        map.on('click', function(e){
+        */
+	map.addLayer(L.mapbox.styleLayer('mapbox://styles/mapbox/streets-v11').setOpacity(0.5));
+	map.addLayer(layer, true ); // Add at bottom
+	
+
+	map.on('click', function(e){
             var whichHex = leafletPip.pointInLayer(e.latlng, layer, true);
             if (whichHex.length == 0)
             {
